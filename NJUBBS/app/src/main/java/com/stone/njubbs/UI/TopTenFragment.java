@@ -4,11 +4,21 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.stone.njubbs.R;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,14 +29,8 @@ import com.stone.njubbs.R;
  * create an instance of this fragment.
  */
 public class TopTenFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+   private static RequestQueue mQueue;
 
     private OnFragmentInteractionListener mListener;
 
@@ -34,31 +38,39 @@ public class TopTenFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment TopTenFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static TopTenFragment newInstance(String param1, String param2) {
+
+    public static TopTenFragment newInstance(RequestQueue queue) {
         TopTenFragment fragment = new TopTenFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
+        mQueue = queue;
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        final StringRequest jsonObjectRequest = new StringRequest("http://bbs.nju.edu.cn/cache/t_top10.js",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        String s = response.substring(response.indexOf(',') + 1, response.length() - 1);
+                        try {
+                            JSONObject myJsonObject = new JSONObject(s);
+                            JSONArray mJsonArray = new JSONArray(myJsonObject.getString("tp"));
+                            for(int i = 0; i< mJsonArray.length(); i++) {
+                                Log.v("stone", mJsonArray.getJSONObject(i).getString("b"));
+                            }
+                        } catch (JSONException e) {
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.v("stone", error.toString());
+                    }
+                });
+        mQueue.add(jsonObjectRequest);
     }
 
     @Override

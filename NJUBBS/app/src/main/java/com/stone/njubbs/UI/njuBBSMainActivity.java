@@ -22,16 +22,8 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.stone.njubbs.R;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 
 public class NJUBBSMainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, TopTenFragment.OnFragmentInteractionListener, BlankFragment.OnFragmentInteractionListener{
@@ -45,6 +37,8 @@ public class NJUBBSMainActivity extends AppCompatActivity
     private TabsAdapter mTabsAdapter = null;
     private ViewPager mViewPager = null;
 
+    private RequestQueue mQueue;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,28 +47,7 @@ public class NJUBBSMainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
 
-        final RequestQueue mQueue = Volley.newRequestQueue(this);
-        final StringRequest jsonObjectRequest = new StringRequest("http://bbs.nju.edu.cn/cache/t_top10.js",
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        String s = response.substring(response.indexOf(',') + 1, response.length() - 1);
-                        try {
-                            JSONObject myJsonObject = new JSONObject(s);
-                            JSONArray mJsonArray = new JSONArray(myJsonObject.getString("tp"));
-                            for(int i = 0; i< mJsonArray.length(); i++) {
-                            }
-                        } catch (JSONException e) {
-                        }
-
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.v("stone", error.toString());
-                    }
-        });
+        mQueue = Volley.newRequestQueue(this);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -82,7 +55,6 @@ public class NJUBBSMainActivity extends AppCompatActivity
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                mQueue.add(jsonObjectRequest);
             }
         });
 
@@ -175,8 +147,8 @@ public class NJUBBSMainActivity extends AppCompatActivity
 
         @Override
         public Fragment getItem(int position) {
-            if (position == 0)
-                return new TopTenFragment();
+            if (position == TAB_INDEX_TOP_TEN)
+                return new TopTenFragment().newInstance(mQueue);
             else return new BlankFragment();
         }
 
