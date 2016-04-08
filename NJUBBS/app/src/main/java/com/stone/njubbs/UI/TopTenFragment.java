@@ -8,17 +8,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.stone.njubbs.R;
+import com.stone.njubbs.Utils.UrlUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,7 +35,8 @@ import org.json.JSONObject;
  */
 public class TopTenFragment extends Fragment {
 
-   private static RequestQueue mQueue;
+    private static RequestQueue mQueue;
+    private ArrayList<Map<String, Object>> mTopTenData = new ArrayList<Map<String, Object>>();
 
     private OnFragmentInteractionListener mListener;
 
@@ -48,7 +54,7 @@ public class TopTenFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final StringRequest jsonObjectRequest = new StringRequest("http://bbs.nju.edu.cn/cache/t_top10.js",
+        final StringRequest topTenRequest = new StringRequest(UrlUtils.URL_TOP_TEN,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -56,9 +62,30 @@ public class TopTenFragment extends Fragment {
                         try {
                             JSONObject myJsonObject = new JSONObject(s);
                             JSONArray mJsonArray = new JSONArray(myJsonObject.getString("tp"));
+                            mTopTenData.clear();
+                            Map<String, Object> map;
                             for(int i = 0; i< mJsonArray.length(); i++) {
-                                Log.v("stone", mJsonArray.getJSONObject(i).getString("b"));
+                                map = new HashMap<String, Object>();
+                                map.put("board", mJsonArray.getJSONObject(i).getString("b"));
+                                map.put("title", mJsonArray.getJSONObject(i).getString("t"));
+                                map.put("file", mJsonArray.getJSONObject(i).getString("f"));
+                                String s1 = String.format(UrlUtils.BBS_URL_FORMAT, mJsonArray.getJSONObject(i).getString("b"), mJsonArray.getJSONObject(i).getString("f"));
+                                mTopTenData.add(map);
                             }
+                            final StringRequest mRequest = new StringRequest(String.format(UrlUtils.BBS_URL_FORMAT, mTopTenData.get(1).get("board"), mTopTenData.get(1).get("file")),
+                                    new Response.Listener<String>() {
+                                        @Override
+                                        public void onResponse(String response) {
+                                            Log.v("stone", response);
+                                        }
+                                    },
+                                    new Response.ErrorListener() {
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
+                                            Log.v("stone", error.toString());
+                                        }
+                                    });
+                            mQueue.add(mRequest);
                         } catch (JSONException e) {
                         }
 
@@ -70,7 +97,7 @@ public class TopTenFragment extends Fragment {
                         Log.v("stone", error.toString());
                     }
                 });
-        mQueue.add(jsonObjectRequest);
+        mQueue.add(topTenRequest);
     }
 
     @Override
