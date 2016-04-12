@@ -3,11 +3,14 @@ package com.stone.njubbs.UI;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
@@ -39,6 +42,7 @@ public class TopTenFragment extends Fragment {
     private ArrayList<Map<String, Object>> mTopTenData = new ArrayList<Map<String, Object>>();
 
     private OnFragmentInteractionListener mListener;
+    ListView mList;
 
     public TopTenFragment() {
         // Required empty public constructor
@@ -69,7 +73,6 @@ public class TopTenFragment extends Fragment {
                                 map.put("board", mJsonArray.getJSONObject(i).getString("b"));
                                 map.put("title", mJsonArray.getJSONObject(i).getString("t"));
                                 map.put("file", mJsonArray.getJSONObject(i).getString("f"));
-                                String s1 = String.format(UrlUtils.BBS_URL_FORMAT, mJsonArray.getJSONObject(i).getString("b"), mJsonArray.getJSONObject(i).getString("f"));
                                 mTopTenData.add(map);
                             }
                             final StringRequest mRequest = new StringRequest(String.format(UrlUtils.BBS_URL_FORMAT, mTopTenData.get(1).get("board"), mTopTenData.get(1).get("file")),
@@ -104,7 +107,17 @@ public class TopTenFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_top_ten, container, false);
+        View mView = inflater.inflate(R.layout.fragment_top_ten, container, false);
+        mList = (ListView) mView.findViewById(R.id.list);
+        return mView;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        String[] strs = {"1","2","3","4","5","6","7", "8", "9", "10", "11", "12", "13", "1","2","3","4","5","6","7", "8", "9", "10", "11", "12", "13"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext() , android.R.layout.simple_expandable_list_item_1, strs);
+        mList.setAdapter(adapter);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
