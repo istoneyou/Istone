@@ -5,20 +5,21 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.stone.njubbs.R;
 import com.stone.njubbs.Utils.UrlUtils;
+import com.stone.njubbs.network.TopTenRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,10 +40,11 @@ import java.util.Map;
 public class TopTenFragment extends Fragment {
 
     private static RequestQueue mQueue;
-    private ArrayList<Map<String, Object>> mTopTenData = new ArrayList<Map<String, Object>>();
+    private ArrayList<Map<String, String>> mTopTenData = new ArrayList<>();
 
     private OnFragmentInteractionListener mListener;
-    ListView mList;
+    RecyclerView mList;
+    TextView mTextView;
 
     public TopTenFragment() {
         // Required empty public constructor
@@ -58,40 +60,11 @@ public class TopTenFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final StringRequest topTenRequest = new StringRequest(UrlUtils.URL_TOP_TEN,
+        final TopTenRequest topTenRequest = new TopTenRequest(Request.Method.GET, UrlUtils.URL_TOP_TEN,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        String s = response.substring(response.indexOf(',') + 1, response.length() - 1);
-                        try {
-                            JSONObject myJsonObject = new JSONObject(s);
-                            JSONArray mJsonArray = new JSONArray(myJsonObject.getString("tp"));
-                            mTopTenData.clear();
-                            Map<String, Object> map;
-                            for(int i = 0; i< mJsonArray.length(); i++) {
-                                map = new HashMap<String, Object>();
-                                map.put("board", mJsonArray.getJSONObject(i).getString("b"));
-                                map.put("title", mJsonArray.getJSONObject(i).getString("t"));
-                                map.put("file", mJsonArray.getJSONObject(i).getString("f"));
-                                mTopTenData.add(map);
-                            }
-                            final StringRequest mRequest = new StringRequest(String.format(UrlUtils.BBS_URL_FORMAT, mTopTenData.get(1).get("board"), mTopTenData.get(1).get("file")),
-                                    new Response.Listener<String>() {
-                                        @Override
-                                        public void onResponse(String response) {
-                                            Log.v("stone", response);
-                                        }
-                                    },
-                                    new Response.ErrorListener() {
-                                        @Override
-                                        public void onErrorResponse(VolleyError error) {
-                                            Log.v("stone", error.toString());
-                                        }
-                                    });
-                            mQueue.add(mRequest);
-                        } catch (JSONException e) {
-                        }
-
+                        Log.v("youlei", response);
                     }
                 },
                 new Response.ErrorListener() {
@@ -108,15 +81,18 @@ public class TopTenFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View mView = inflater.inflate(R.layout.fragment_top_ten, container, false);
-        mList = (ListView) mView.findViewById(R.id.list);
+        mList = (RecyclerView) mView.findViewById(R.id.list);
+        mTextView = (TextView) mView.findViewById(R.id.text);
         return mView;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        String[] strs = {"1","2","3","4","5","6","7", "8", "9", "10", "11", "12", "13", "1","2","3","4","5","6","7", "8", "9", "10", "11", "12", "13"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext() , android.R.layout.simple_expandable_list_item_1, strs);
+        String[] strs = {"1","2","3","4","5","6","7", "8", "9", "10", "11", "12", "13", "1","2","3","4","5","6","7", "8", "9", "10", "11", "12", "13", "1","2","3","4","5","6","7", "8", "9", "10", "11", "12", "13"};
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext());
+        mList.setLayoutManager(mLayoutManager);
+        MyAdapter adapter = new MyAdapter(strs);
         mList.setAdapter(adapter);
     }
 
@@ -157,5 +133,52 @@ public class TopTenFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
+        private String[] mDataset;
+
+        // Provide a reference to the type of views that you are using
+        // (custom viewholder)
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            public TextView mTextView;
+            public ViewHolder(TextView v) {
+                super(v);
+                mTextView = v;
+            }
+        }
+
+        // Provide a suitable constructor (depends on the kind of dataset)
+        public MyAdapter(String[] myDataset) {
+            mDataset = myDataset;
+        }
+
+        // Create new views (invoked by the layout manager)
+        @Override
+        public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                       int viewType) {
+            // create a new view
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(android.R.layout.simple_expandable_list_item_1, parent, false);
+            // set the view's size, margins, paddings and layout parameters
+            TextView textView = (TextView) v.findViewById(android.R.id.text1) ;
+            ViewHolder vh = new ViewHolder(textView);
+            return vh;
+        }
+
+        // Replace the contents of a view (invoked by the layout manager)
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            // - get element from your dataset at this position
+            // - replace the contents of the view with that element
+            holder.mTextView.setText(mDataset[position]);
+
+        }
+
+        // Return the size of your dataset (invoked by the layout manager)
+        @Override
+        public int getItemCount() {
+            return mDataset.length;
+        }
     }
 }

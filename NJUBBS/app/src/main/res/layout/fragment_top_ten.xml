@@ -15,12 +15,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/hello_top_ten_fragment"/>
-        <ListView
+        <android.support.v7.widget.RecyclerView
             android:id="@+id/list"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-        </ListView>
+        </android.support.v7.widget.RecyclerView>
 </LinearLayout>
 
 </FrameLayout>
