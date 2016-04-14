@@ -4,10 +4,11 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,17 +18,17 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.stone.njubbs.R;
 import com.stone.njubbs.Utils.UrlUtils;
-import com.stone.njubbs.network.TopTenRequest;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.stone.njubbs.data.Article;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -40,11 +41,10 @@ import java.util.Map;
 public class TopTenFragment extends Fragment {
 
     private static RequestQueue mQueue;
-    private ArrayList<Map<String, String>> mTopTenData = new ArrayList<>();
 
     private OnFragmentInteractionListener mListener;
-    RecyclerView mList;
-    TextView mTextView;
+    public RecyclerView mList;
+    MyAdapter adapter;
 
     public TopTenFragment() {
         // Required empty public constructor
@@ -60,20 +60,6 @@ public class TopTenFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final TopTenRequest topTenRequest = new TopTenRequest(Request.Method.GET, UrlUtils.URL_TOP_TEN,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.v("youlei", response);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.v("stone", error.toString());
-                    }
-                });
-        mQueue.add(topTenRequest);
     }
 
     @Override
@@ -82,18 +68,24 @@ public class TopTenFragment extends Fragment {
         // Inflate the layout for this fragment
         View mView = inflater.inflate(R.layout.fragment_top_ten, container, false);
         mList = (RecyclerView) mView.findViewById(R.id.list);
-        mTextView = (TextView) mView.findViewById(R.id.text);
         return mView;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        String[] strs = {"1","2","3","4","5","6","7", "8", "9", "10", "11", "12", "13", "1","2","3","4","5","6","7", "8", "9", "10", "11", "12", "13", "1","2","3","4","5","6","7", "8", "9", "10", "11", "12", "13"};
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         mList.setLayoutManager(mLayoutManager);
-        MyAdapter adapter = new MyAdapter(strs);
+        mList.addItemDecoration(new DividerItemDecoration(
+                getActivity(), DividerItemDecoration.VERTICAL_LIST));
+        adapter = new MyAdapter();
         mList.setAdapter(adapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadTopTenData();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -136,20 +128,33 @@ public class TopTenFragment extends Fragment {
     }
 
     public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
-        private String[] mDataset;
+        private List<Article> mDataset = new ArrayList<>();
 
         // Provide a reference to the type of views that you are using
         // (custom viewholder)
         public class ViewHolder extends RecyclerView.ViewHolder {
-            public TextView mTextView;
-            public ViewHolder(TextView v) {
+            public TextView mAuthorView;
+            public TextView mTitleView;
+            public TextView mBoardView;
+            public TextView mNumView;
+            public View itemView;
+
+            public ViewHolder(View v) {
                 super(v);
-                mTextView = v;
+                itemView = v;
+                mAuthorView = (TextView) v.findViewById(R.id.author);
+                mTitleView = (TextView) v.findViewById(R.id.title);
+                mBoardView = (TextView) v.findViewById(R.id.board);
+                mNumView = (TextView) v.findViewById(R.id.num);
             }
         }
 
         // Provide a suitable constructor (depends on the kind of dataset)
-        public MyAdapter(String[] myDataset) {
+        public MyAdapter() {
+
+        }
+
+        private void setData(List<Article> myDataset) {
             mDataset = myDataset;
         }
 
@@ -159,10 +164,12 @@ public class TopTenFragment extends Fragment {
                                                        int viewType) {
             // create a new view
             View v = LayoutInflater.from(parent.getContext())
-                    .inflate(android.R.layout.simple_expandable_list_item_1, parent, false);
+                    .inflate(R.layout.list_item_topic, parent, false);
             // set the view's size, margins, paddings and layout parameters
-            TextView textView = (TextView) v.findViewById(android.R.id.text1) ;
-            ViewHolder vh = new ViewHolder(textView);
+            TypedValue typedValue = new TypedValue();
+            getActivity().getTheme().resolveAttribute(R.attr.selectableItemBackground, typedValue, true);
+            v.setBackgroundResource(typedValue.resourceId);
+            ViewHolder vh = new ViewHolder(v);
             return vh;
         }
 
@@ -171,14 +178,62 @@ public class TopTenFragment extends Fragment {
         public void onBindViewHolder(ViewHolder holder, int position) {
             // - get element from your dataset at this position
             // - replace the contents of the view with that element
-            holder.mTextView.setText(mDataset[position]);
+            final Article article = mDataset.get(position);
+            holder.mAuthorView.setText(article.getAuthor());
+            holder.mTitleView.setText(article.getTitle());
+            holder.mBoardView.setText(article.getBoard());
+            holder.mNumView.setText(article.getNum());
 
+            holder.itemView.setClickable(true);
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Snackbar.make(mList, article.getTitle(), Snackbar.LENGTH_LONG).show();
+                }
+            });
         }
 
         // Return the size of your dataset (invoked by the layout manager)
         @Override
         public int getItemCount() {
-            return mDataset.length;
+            return mDataset.size();
         }
+    }
+
+    private void loadTopTenData() {
+        final StringRequest topTenRequest = new StringRequest(Request.Method.GET, UrlUtils.URL_TOP_TEN,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        adapter.setData(jsoupTopTenParser(response));
+                        adapter.notifyDataSetChanged();
+                        Snackbar.make(mList, "reflash success", Snackbar.LENGTH_LONG).show();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Snackbar.make(mList, "reflash error", Snackbar.LENGTH_LONG).show();
+                    }
+                });
+        mQueue.add(topTenRequest);
+        mQueue.start();
+    }
+
+    private List<Article> jsoupTopTenParser(String htmlStr) {
+        List<Article> topTenData = new ArrayList();
+        Document doc = Jsoup.parse(htmlStr);
+        Elements trs = doc.select("tr");
+        for (int i =1; i < trs.size(); i ++ ) {
+            Elements cols = trs.get(i).children();
+            String board = cols.get(1).text();
+            String title = cols.get(2).text();
+            String uri = UrlUtils.BASE_BBS_URL + cols.get(2).select("a").attr("href").trim();
+            String author = cols.get(3).text();
+            String num = cols.get(4).text();
+            Article article = new Article(board, title, uri, author, num);
+            topTenData.add(article);
+        }
+        return topTenData;
     }
 }

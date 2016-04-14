@@ -69,6 +69,11 @@ public class NJUBBSMainActivity extends AppCompatActivity
         initTabs();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
     private void initTabs() {
         mTabTitles = new String[NUM_TAB];
         mTabTitles[0] = getString(R.string.tab_title_top_ten);
