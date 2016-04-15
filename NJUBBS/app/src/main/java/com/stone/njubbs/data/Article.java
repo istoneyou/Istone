@@ -7,14 +7,14 @@ public class Article {
     private String mTitle;
     private String mBoard;
     private String mAuthor;
-    private String mUri;
+    private String mUrl;
     private String mNum;
 
-    public Article(String board, String title, String uri, String author, String num) {
+    public Article(String board, String title, String url, String author, String num) {
         mTitle = title;
         mBoard = board;
         mAuthor = author;
-        mUri = uri;
+        mUrl = url;
         mNum = num;
     }
 
@@ -34,8 +34,8 @@ public class Article {
         return mTitle;
     }
 
-    public String getUri() {
-        return mUri;
+    public String getUrl() {
+        return mUrl;
     }
 
     public void setAuthor(String mAuthor) {
@@ -54,7 +54,7 @@ public class Article {
         this.mTitle = mTitle;
     }
 
-    public void setUri(String mUri) {
-        this.mUri = mUri;
+    public void setUrl(String mUrl) {
+        this.mUrl = mUrl;
     }
 }

@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,14 +21,18 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.stone.njubbs.R;
+import com.stone.njubbs.Utils.NetworkUtils;
 import com.stone.njubbs.Utils.UrlUtils;
 import com.stone.njubbs.data.Article;
 
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 /**
@@ -85,7 +90,7 @@ public class TopTenFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        loadTopTenData();
+        loadTopTenData(getActivity());
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -188,7 +193,14 @@ public class TopTenFragment extends Fragment {
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Snackbar.make(mList, article.getTitle(), Snackbar.LENGTH_LONG).show();
+                    callOnClick(article.getUrl());
+                    Snackbar.make(mList, article.getUrl(), Snackbar.LENGTH_LONG).show();
+                }
+            });
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    return true;
                 }
             });
         }
@@ -200,28 +212,52 @@ public class TopTenFragment extends Fragment {
         }
     }
 
-    private void loadTopTenData() {
-        final StringRequest topTenRequest = new StringRequest(Request.Method.GET, UrlUtils.URL_TOP_TEN,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        adapter.setData(jsoupTopTenParser(response));
-                        adapter.notifyDataSetChanged();
-                        Snackbar.make(mList, "reflash success", Snackbar.LENGTH_LONG).show();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Snackbar.make(mList, "reflash error", Snackbar.LENGTH_LONG).show();
-                    }
-                });
-        mQueue.add(topTenRequest);
-        mQueue.start();
+    private void loadTopTenData(Context context) {
+        if (NetworkUtils.isNetworkAvailable(context)) {
+            final StringRequest topTenRequest = new StringRequest(Request.Method.GET, UrlUtils.URL_TOP_TEN,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            adapter.setData(jsoupTopTenParser(response));
+                            adapter.notifyDataSetChanged();
+                            Snackbar.make(mList, "network ok reflash success", Snackbar.LENGTH_LONG).show();
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            adapter.setData(jsoupTopTenParser(getFromDiskCache(UrlUtils.URL_TOP_TEN)));
+                            adapter.notifyDataSetChanged();
+                            Snackbar.make(mList, "network ok reflash error", Snackbar.LENGTH_LONG).show();
+                        }
+                    });
+            topTenRequest.setShouldCache(true);
+            mQueue.add(topTenRequest);
+            mQueue.start();
+        } else {
+            adapter.setData(jsoupTopTenParser(getFromDiskCache(UrlUtils.URL_TOP_TEN)));
+            adapter.notifyDataSetChanged();
+            Snackbar.make(mList, "no network get data from disk", Snackbar.LENGTH_LONG).show();
+        }
+    }
+
+    private String getFromDiskCache(String url) {
+        if (mQueue.getCache().get(url) != null) {
+            try {
+                String response = new String(mQueue.getCache().get(url).data, "gb2312");
+                return response;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     private List<Article> jsoupTopTenParser(String htmlStr) {
         List<Article> topTenData = new ArrayList();
+        if (htmlStr == null || htmlStr.isEmpty()) {
+            return topTenData;
+        }
         Document doc = Jsoup.parse(htmlStr);
         Elements trs = doc.select("tr");
         for (int i =1; i < trs.size(); i ++ ) {
@@ -235,5 +271,37 @@ public class TopTenFragment extends Fragment {
             topTenData.add(article);
         }
         return topTenData;
+    }
+    private void callOnClick(String url) {
+        final StringRequest topRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Document doc = Jsoup.parse(response);
+                        Elements tables = doc.select("table");
+                        for(Element table : tables) {
+                            Element textArea = table.select("textarea").first();
+                            String[] strings = textArea.text().split("\n");
+                            StringBuilder stringBuilder = new StringBuilder();
+                            for (int i = 3; i < strings.length -1; i ++)
+                            {
+                                if (!strings[i].trim().isEmpty()) {
+                                    stringBuilder.append(strings[i]);
+                                    stringBuilder.append("\n");
+                                }
+                            }
+                            Log.v("youlei1", stringBuilder.toString());
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+        topRequest.setShouldCache(true);
+        mQueue.add(topRequest);
+        mQueue.start();
     }
 }
