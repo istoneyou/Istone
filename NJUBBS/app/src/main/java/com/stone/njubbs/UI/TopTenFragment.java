@@ -1,6 +1,7 @@
 package com.stone.njubbs.UI;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -25,7 +26,6 @@ import com.stone.njubbs.Utils.NetworkUtils;
 import com.stone.njubbs.Utils.UrlUtils;
 import com.stone.njubbs.data.Article;
 
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +44,9 @@ import org.jsoup.select.Elements;
  * create an instance of this fragment.
  */
 public class TopTenFragment extends Fragment {
+
+    private static final String ARG_QUERY_URL = "query_url";
+
 
     private static RequestQueue mQueue;
 
@@ -193,7 +196,9 @@ public class TopTenFragment extends Fragment {
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    callOnClick(article.getUrl());
+                    Intent intent = new Intent(getContext(), TopicAndCommentsActivity.class);
+                    intent.putExtra(ARG_QUERY_URL, article.getUrl());
+                    startActivity(intent);
                     Snackbar.make(mList, article.getUrl(), Snackbar.LENGTH_LONG).show();
                 }
             });
@@ -271,37 +276,5 @@ public class TopTenFragment extends Fragment {
             topTenData.add(article);
         }
         return topTenData;
-    }
-    private void callOnClick(String url) {
-        final StringRequest topRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Document doc = Jsoup.parse(response);
-                        Elements tables = doc.select("table");
-                        for(Element table : tables) {
-                            Element textArea = table.select("textarea").first();
-                            String[] strings = textArea.text().split("\n");
-                            StringBuilder stringBuilder = new StringBuilder();
-                            for (int i = 3; i < strings.length -1; i ++)
-                            {
-                                if (!strings[i].trim().isEmpty()) {
-                                    stringBuilder.append(strings[i]);
-                                    stringBuilder.append("\n");
-                                }
-                            }
-                            Log.v("youlei1", stringBuilder.toString());
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                });
-        topRequest.setShouldCache(true);
-        mQueue.add(topRequest);
-        mQueue.start();
     }
 }

@@ -10,4 +10,5 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="hello_top_ten_fragment">Hello top ten fragment</string>
     <string name="tab_title_top_ten">topten</string>
+    <string name="title_activity_topic_and_comments">TopicAndCommentsActivity</string>
 </resources>

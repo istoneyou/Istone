@@ -10,6 +10,10 @@ public class Article {
     private String mUrl;
     private String mNum;
 
+    public Article() {
+
+    }
+
     public Article(String board, String title, String url, String author, String num) {
         mTitle = title;
         mBoard = board;
