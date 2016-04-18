@@ -14,4 +14,8 @@ public class NetworkUtils {
         NetworkInfo info = manager.getActiveNetworkInfo();
         return  (info != null && info.isConnected());
     }
+
+    public static  boolean isAvailablePicUrl(Context context, String str) {
+        return (str.startsWith("http") && str.endsWith(".jpg"));
+    }
 }

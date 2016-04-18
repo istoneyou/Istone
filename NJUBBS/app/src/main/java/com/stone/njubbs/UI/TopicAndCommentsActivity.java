@@ -6,6 +6,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.stone.njubbs.R;
@@ -26,6 +27,7 @@ public class TopicAndCommentsActivity extends AppCompatActivity implements Topic
         setContentView(R.layout.activity_topic_and_comments);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         String url = "";
         if (getIntent() != null) {
             url = getIntent().getStringExtra(ARG_QUERY_URL);
@@ -47,4 +49,12 @@ public class TopicAndCommentsActivity extends AppCompatActivity implements Topic
         });
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home :
+                finish();
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

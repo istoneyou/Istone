@@ -16,6 +16,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.stone.njubbs.R;
+import com.stone.njubbs.Utils.NetworkUtils;
 import com.stone.njubbs.data.Article;
 
 import org.jsoup.Jsoup;
@@ -136,8 +137,18 @@ public class TopicAndCommentsActivityFragment extends Fragment {
                             StringBuilder stringBuilder = new StringBuilder();
                             for (int i = 3; i < strings.length -1; i ++)
                             {
-                                if (!strings[i].trim().isEmpty() && !strings[i].trim().endsWith("[m")) {
-                                    stringBuilder.append(strings[i]);
+                                String s = strings[i].trim();
+                                if (s.endsWith("[m")) {
+                                    break;
+                                }
+                                if (!s.isEmpty()) {
+                                    if (NetworkUtils.isAvailablePicUrl(getContext(), s)) {
+                                        stringBuilder.append("<img src='");
+                                        stringBuilder.append(s);
+                                        stringBuilder.append("'>");
+                                    } else {
+                                        stringBuilder.append(strings[i]);
+                                    }
                                     stringBuilder.append("\n");
                                 }
                             }
