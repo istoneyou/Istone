@@ -1,15 +1,21 @@
 package com.stone.njubbs.UI;
 
+import android.content.Context;
+import android.support.v4.util.LruCache;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.ImageLoader;
 import com.stone.njubbs.R;
 import com.stone.njubbs.UI.TopicAndCommentsActivityFragment.OnListFragmentInteractionListener;
 import com.stone.njubbs.data.Article;
+import com.stone.njubbs.data.URLImageParser;
 
 import java.util.List;
 
@@ -18,15 +24,20 @@ import java.util.List;
  * specified {@link OnListFragmentInteractionListener}.
  * TODO: Replace the implementation with code for your data type.
  */
-public class TopicAndCommentsAdapter extends RecyclerView.Adapter<TopicAndCommentsAdapter.ViewHolder> {
+public class TopicAndCommentsAdapter extends RecyclerView.Adapter<TopicAndCommentsAdapter.ViewHolder>{
 
     private List<Article> mValues;
     private final OnListFragmentInteractionListener mListener;
+    private Context mContext;
+    private  ImageLoader.ImageCache mImageCache;
 
-    public TopicAndCommentsAdapter(List<Article> items, OnListFragmentInteractionListener listener) {
+    public TopicAndCommentsAdapter(Context context, List<Article> items, OnListFragmentInteractionListener listener, ImageLoader.ImageCache imageCache) {
         mValues = items;
         mListener = listener;
+        mContext = context;
+        mImageCache = imageCache;
     }
+
 
     public void setData(List<Article> mData) {
         mValues = mData;
@@ -43,8 +54,7 @@ public class TopicAndCommentsAdapter extends RecyclerView.Adapter<TopicAndCommen
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(position + "");
-        holder.mContentView.setText(mValues.get(position).getTitle());
-
+        holder.mContentView.setText(Html.fromHtml(mValues.get(position).getTitle(), new URLImageParser(mContext, holder.mContentView, mImageCache), null));
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

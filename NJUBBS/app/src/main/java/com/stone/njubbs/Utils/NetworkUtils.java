@@ -16,6 +16,6 @@ public class NetworkUtils {
     }
 
     public static  boolean isAvailablePicUrl(Context context, String str) {
-        return (str.startsWith("http") && str.endsWith(".jpg"));
+        return (str.startsWith("http") && (str.endsWith(".jpg") || str.endsWith(".png") || str.endsWith(".jpeg")));
     }
 }

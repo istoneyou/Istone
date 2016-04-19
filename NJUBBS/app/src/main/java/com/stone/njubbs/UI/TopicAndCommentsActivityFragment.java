@@ -1,8 +1,10 @@
 package com.stone.njubbs.UI;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.LruCache;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,6 +15,7 @@ import android.view.ViewGroup;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.stone.njubbs.R;
@@ -40,6 +43,20 @@ public class TopicAndCommentsActivityFragment extends Fragment {
     private OnListFragmentInteractionListener mListener;
     private  String queryURl;
     private TopicAndCommentsAdapter mAdapter;
+
+    final LruCache<String, Bitmap> lruCache = new LruCache<String, Bitmap>(10 * 1024 * 1024);
+    ImageLoader.ImageCache imageCache = new ImageLoader.ImageCache() {
+        @Override
+        public void putBitmap(String key, Bitmap value) {
+            Log.v("youlei1", key);
+            lruCache.put(key, value);
+        }
+
+        @Override
+        public Bitmap getBitmap(String key) {
+            return lruCache.get(key);
+        }
+    };
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -82,7 +99,7 @@ public class TopicAndCommentsActivityFragment extends Fragment {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            mAdapter = new TopicAndCommentsAdapter(new ArrayList<Article>(), mListener);
+            mAdapter = new TopicAndCommentsAdapter(getContext(), new ArrayList<Article>(), mListener, imageCache);
             recyclerView.addItemDecoration(new DividerItemDecoration(
                     getActivity(), DividerItemDecoration.VERTICAL_LIST));
             recyclerView.setAdapter(mAdapter);
@@ -125,7 +142,7 @@ public class TopicAndCommentsActivityFragment extends Fragment {
 
     private void loadTopicAndComments() {
         final List<Article> mData = new ArrayList<>();
-        final StringRequest topRequest = new StringRequest(Request.Method.GET, queryURl,
+        final StringRequest topicAndCommentsRequest = new StringRequest(Request.Method.GET, queryURl,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -145,7 +162,7 @@ public class TopicAndCommentsActivityFragment extends Fragment {
                                     if (NetworkUtils.isAvailablePicUrl(getContext(), s)) {
                                         stringBuilder.append("<img src='");
                                         stringBuilder.append(s);
-                                        stringBuilder.append("'>");
+                                        stringBuilder.append("'/>");
                                     } else {
                                         stringBuilder.append(strings[i]);
                                     }
@@ -166,7 +183,7 @@ public class TopicAndCommentsActivityFragment extends Fragment {
 
                     }
                 });
-        topRequest.setShouldCache(true);
-        Volley.newRequestQueue(getContext()).add(topRequest);
+        topicAndCommentsRequest.setShouldCache(true);
+        Volley.newRequestQueue(getContext()).add(topicAndCommentsRequest);
     }
 }
