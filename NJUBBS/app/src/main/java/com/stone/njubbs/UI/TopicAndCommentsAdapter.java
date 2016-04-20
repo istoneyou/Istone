@@ -55,6 +55,7 @@ public class TopicAndCommentsAdapter extends RecyclerView.Adapter<TopicAndCommen
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(position + "");
         holder.mContentView.setText(Html.fromHtml(mValues.get(position).getTitle(), new URLImageParser(mContext, holder.mContentView, mImageCache), null));
+        holder.mContentView.setMovementMethod(LinkMovementMethod.getInstance());
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

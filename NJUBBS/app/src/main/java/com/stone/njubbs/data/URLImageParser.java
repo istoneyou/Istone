@@ -2,22 +2,26 @@ package com.stone.njubbs.data;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
-import android.util.Log;
 import android.widget.TextView;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 import com.stone.njubbs.R;
+import com.stone.njubbs.Utils.NetworkUtils;
 
 /**
  * Created by Stone on 2016/4/19.
  */
 public class URLImageParser implements Html.ImageGetter{
+    private final int DEFAULT_WIDTH = 800;
+    private final int DEFAULT_HEIGH = 800;
 
     Context mContext;
     TextView mTextView;
@@ -29,36 +33,42 @@ public class URLImageParser implements Html.ImageGetter{
         mContext = context;
         mTextView = textView;
         mImageCache = imageCache;
-        mDefaultDrawable = mContext.getDrawable(R.drawable.ic_menu_camera);
+        mDefaultDrawable = mContext.getDrawable(R.mipmap.ic_launcher);
 
     }
 
     @Override
     public Drawable getDrawable(final String source) {
-        Drawable mDrawable;
-        mDefaultDrawable.setBounds(0, 0, 300, 300);
-
+        final UrlDrawable mDrawable = new UrlDrawable();
+        mDefaultDrawable.setBounds(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGH);
         ImageLoader imageLoader = new ImageLoader(Volley.newRequestQueue(mContext), mImageCache);
         ImageLoader.ImageListener listeners = new ImageLoader.ImageListener() {
             @Override
             public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                if (response.getBitmap() != null) {
+                Bitmap rawBitmap = response.getBitmap();
+                if (rawBitmap != null) {
+                    Matrix matrix = NetworkUtils.getBitmapMatrix(rawBitmap.getWidth(), rawBitmap.getHeight(), DEFAULT_WIDTH, DEFAULT_HEIGH);
+                    Bitmap result = Bitmap.createBitmap(rawBitmap, 0, 0, rawBitmap.getWidth(), rawBitmap.getHeight(), matrix, true);
+                    mDrawable.bitmap = result;
+                    mTextView.setText(mTextView.getText());
                 } else {
-                    Log.v("youlei1", "======== null");
                 }
-
             }
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.v("youlei1", "error");
 
             }
         };
-        mDrawable = new BitmapDrawable(imageLoader.get(source, listeners).getBitmap());
-        mDrawable.setBounds(0, 0, 600, 800);
-
-        Log.v("youlei1", "return");
+        Bitmap bt = imageLoader.get(source, listeners).getBitmap();
+        if (bt != null) {
+            Matrix matrix = NetworkUtils.getBitmapMatrix(bt.getWidth(), bt.getHeight(), DEFAULT_WIDTH, DEFAULT_HEIGH);
+            Bitmap result = Bitmap.createBitmap(bt, 0, 0, bt.getWidth(), bt.getHeight(), matrix, true);
+            mDrawable.bitmap = result;
+        } else {
+            mDrawable.bitmap = ((BitmapDrawable) mDefaultDrawable).getBitmap();
+        }
+        mDrawable.setBounds(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGH);
         return mDrawable;
     }
 
@@ -68,7 +78,6 @@ public class URLImageParser implements Html.ImageGetter{
 
         @Override
         public void draw(Canvas canvas) {
-            // override the draw to facilitate refresh function later
             if (bitmap != null) {
                 canvas.drawBitmap(bitmap, 0, 0, getPaint());
             }

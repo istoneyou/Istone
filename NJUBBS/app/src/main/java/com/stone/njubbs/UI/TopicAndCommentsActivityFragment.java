@@ -48,7 +48,6 @@ public class TopicAndCommentsActivityFragment extends Fragment {
     ImageLoader.ImageCache imageCache = new ImageLoader.ImageCache() {
         @Override
         public void putBitmap(String key, Bitmap value) {
-            Log.v("youlei1", key);
             lruCache.put(key, value);
         }
 
