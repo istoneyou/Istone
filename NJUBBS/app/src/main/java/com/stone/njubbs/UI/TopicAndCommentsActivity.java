@@ -9,12 +9,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.stone.njubbs.R;
 import com.stone.njubbs.data.Article;
 
 public class TopicAndCommentsActivity extends AppCompatActivity implements TopicAndCommentsActivityFragment.OnListFragmentInteractionListener{
 
     private static final String ARG_QUERY_URL = "query_url";
+    private RequestQueue mQueue;
 
     @Override
     public void onListFragmentInteraction(Article item) {
@@ -35,7 +38,8 @@ public class TopicAndCommentsActivity extends AppCompatActivity implements Topic
         if (url == null || url.isEmpty()) {
             finish();
         }
-        TopicAndCommentsActivityFragment fragment = TopicAndCommentsActivityFragment.newInstance(url);
+        mQueue = Volley.newRequestQueue(this);
+        TopicAndCommentsActivityFragment fragment = TopicAndCommentsActivityFragment.newInstance(url, mQueue);
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, fragment);
         fragmentTransaction.commit();

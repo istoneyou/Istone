@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
@@ -43,8 +44,9 @@ public class TopicAndCommentsActivityFragment extends Fragment {
     private OnListFragmentInteractionListener mListener;
     private  String queryURl;
     private TopicAndCommentsAdapter mAdapter;
+    private static RequestQueue mQueue;
 
-    final LruCache<String, Bitmap> lruCache = new LruCache<String, Bitmap>(10 * 1024 * 1024);
+    final LruCache<String, Bitmap> lruCache = new LruCache<>(10 * 1024 * 1024);
     ImageLoader.ImageCache imageCache = new ImageLoader.ImageCache() {
         @Override
         public void putBitmap(String key, Bitmap value) {
@@ -65,8 +67,9 @@ public class TopicAndCommentsActivityFragment extends Fragment {
     }
 
     @SuppressWarnings("unused")
-    public static TopicAndCommentsActivityFragment newInstance(String queryUrl) {
+    public static TopicAndCommentsActivityFragment newInstance(String queryUrl, RequestQueue queue) {
         TopicAndCommentsActivityFragment fragment = new TopicAndCommentsActivityFragment();
+        mQueue = queue;
         Bundle args = new Bundle();
         args.putString(ARG_QUERY_URL, queryUrl);
         fragment.setArguments(args);
@@ -183,6 +186,7 @@ public class TopicAndCommentsActivityFragment extends Fragment {
                     }
                 });
         topicAndCommentsRequest.setShouldCache(true);
-        Volley.newRequestQueue(getContext()).add(topicAndCommentsRequest);
+        mQueue.add(topicAndCommentsRequest);
+        mQueue.start();
     }
 }
