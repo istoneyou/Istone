@@ -31,15 +31,16 @@ public class TopicAndCommentsActivity extends AppCompatActivity implements Topic
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        String url = "";
+        Article article = null;
         if (getIntent() != null) {
-            url = getIntent().getStringExtra(ARG_QUERY_URL);
+            article = getIntent().getParcelableExtra(ARG_QUERY_URL);
         }
-        if (url == null || url.isEmpty()) {
+        if (article == null || article.getUrl().isEmpty()) {
             finish();
         }
+        getSupportActionBar().setTitle(article.getBoard());
         mQueue = Volley.newRequestQueue(this);
-        TopicAndCommentsActivityFragment fragment = TopicAndCommentsActivityFragment.newInstance(url, mQueue);
+        TopicAndCommentsActivityFragment fragment = TopicAndCommentsActivityFragment.newInstance(article.getUrl(), mQueue);
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, fragment);
         fragmentTransaction.commit();

@@ -196,9 +196,8 @@ public class TopTenFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(getContext(), TopicAndCommentsActivity.class);
-                    intent.putExtra(ARG_QUERY_URL, article.getUrl());
+                    intent.putExtra(ARG_QUERY_URL, article);
                     startActivity(intent);
-                    Snackbar.make(mList, article.getUrl(), Snackbar.LENGTH_LONG).show();
                 }
             });
             holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {

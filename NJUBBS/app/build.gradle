@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 apply plugin: 'com.android.application'
 
 android {
@@ -8,8 +10,8 @@ android {
         applicationId "com.stone.njubbs"
         minSdkVersion 21
         targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        versionCode getCustomVersionCode()
+        versionName "v${getVersionNameMajor()}.${dateStamp()}.${getCommitID()}"
     }
     buildTypes {
         release {
@@ -27,4 +29,45 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
     compile project(':volley')
     compile project(':pullToRefresh')
+}
+
+def dateStamp() {
+    def df = new SimpleDateFormat("yyMMdd")
+    return df.format(new Date())
+}
+
+def getCommitID() {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'show', '-s', '--pretty=oneline'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim().substring(0, 7)
+}
+
+def getVersionNameMajor() {
+    def manifest = new XmlSlurper().parse(file("src/main/AndroidManifest.xml"))
+    if (manifest == null) {
+        return "1.0.0"
+    }
+    def vn = manifest['@android:versionName'].text()
+    if (vn != null && !vn.equals("")) {
+        return vn
+    } else {
+        return "1.0.0"
+    }
+}
+
+def getCustomVersionCode() {
+    def manifest = new XmlSlurper().parse(file("src/main/AndroidManifest.xml"))
+    if (manifest == null) {
+        return 100000000
+    }
+    def vc = manifest['@android:revisionCode'].text()
+    if (vc != null && !vc.equals("")) {
+        vc = Integer.parseInt(vc)
+        return vc
+    } else {
+        return 100000000
+    }
 }

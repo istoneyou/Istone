@@ -57,7 +57,7 @@ public class Article implements Parcelable{
         public Article[] newArray(int size) {
             return new Article[0];
         }
-    }
+    };
 
     public String getAuthor() {
         return mAuthor;
