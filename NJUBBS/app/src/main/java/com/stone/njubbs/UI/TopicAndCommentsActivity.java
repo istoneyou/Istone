@@ -11,6 +11,7 @@ import android.view.View;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.stone.njubbs.NJUBBSApplication;
 import com.stone.njubbs.R;
 import com.stone.njubbs.data.Article;
 
@@ -39,7 +40,7 @@ public class TopicAndCommentsActivity extends AppCompatActivity implements Topic
             finish();
         }
         getSupportActionBar().setTitle(article.getBoard());
-        mQueue = Volley.newRequestQueue(this);
+        mQueue = NJUBBSApplication.getRequestQueue();
         TopicAndCommentsActivityFragment fragment = TopicAndCommentsActivityFragment.newInstance(article.getUrl(), mQueue);
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, fragment);

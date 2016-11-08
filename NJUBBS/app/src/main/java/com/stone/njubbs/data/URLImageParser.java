@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
+import com.stone.njubbs.NJUBBSApplication;
 import com.stone.njubbs.R;
 import com.stone.njubbs.Utils.NetworkUtils;
 
@@ -41,7 +42,7 @@ public class URLImageParser implements Html.ImageGetter{
     public Drawable getDrawable(final String source) {
         final UrlDrawable mDrawable = new UrlDrawable();
         mDefaultDrawable.setBounds(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGH);
-        ImageLoader imageLoader = new ImageLoader(Volley.newRequestQueue(mContext), mImageCache);
+        ImageLoader imageLoader = new ImageLoader(NJUBBSApplication.getRequestQueue(), mImageCache);
         ImageLoader.ImageListener listeners = new ImageLoader.ImageListener() {
             @Override
             public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {

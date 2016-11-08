@@ -21,8 +21,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
+
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.stone.njubbs.NJUBBSApplication;
 import com.stone.njubbs.R;
 
 public class NJUBBSMainActivity extends AppCompatActivity
@@ -47,7 +49,7 @@ public class NJUBBSMainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
 
-        mQueue = Volley.newRequestQueue(this);
+        mQueue = NJUBBSApplication.getRequestQueue();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
