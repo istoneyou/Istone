@@ -7,20 +7,22 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.stone.njubbs.NJUBBSApplication;
 import com.stone.njubbs.R;
 import com.stone.njubbs.Utils.NetworkUtils;
 import com.stone.njubbs.Utils.UrlUtils;
@@ -29,6 +31,7 @@ import com.stone.njubbs.data.Article;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -42,7 +45,7 @@ import org.jsoup.select.Elements;
  * Use the {@link TopTenFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class TopTenFragment extends Fragment {
+public class TopTenFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private static final String ARG_QUERY_URL = "query_url";
 
@@ -51,6 +54,7 @@ public class TopTenFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     public RecyclerView mList;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     MyAdapter adapter;
 
     public TopTenFragment() {
@@ -58,9 +62,9 @@ public class TopTenFragment extends Fragment {
     }
 
 
-    public static TopTenFragment newInstance(RequestQueue queue) {
+    public static TopTenFragment newInstance() {
         TopTenFragment fragment = new TopTenFragment();
-        mQueue = queue;
+        mQueue = NJUBBSApplication.getRequestQueue();
         return fragment;
     }
 
@@ -75,6 +79,8 @@ public class TopTenFragment extends Fragment {
         // Inflate the layout for this fragment
         View mView = inflater.inflate(R.layout.fragment_top_ten, container, false);
         mList = (RecyclerView) mView.findViewById(R.id.list);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) mView.findViewById(R.id.mSwipeRefreshLayout);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
         return mView;
     }
 
@@ -95,6 +101,12 @@ public class TopTenFragment extends Fragment {
         loadTopTenData(getActivity());
     }
 
+    @Override
+    public void onRefresh() {
+        loadTopTenData(getActivity());
+
+    }
+
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -111,6 +123,12 @@ public class TopTenFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopRefresh();
     }
 
     @Override
@@ -223,6 +241,7 @@ public class TopTenFragment extends Fragment {
                         public void onResponse(String response) {
                             adapter.setData(jsoupTopTenParser(response));
                             adapter.notifyDataSetChanged();
+                            stopRefresh();
                             Snackbar.make(mList, "network ok reflash success", Snackbar.LENGTH_LONG).show();
                         }
                     },
@@ -231,6 +250,7 @@ public class TopTenFragment extends Fragment {
                         public void onErrorResponse(VolleyError error) {
                             adapter.setData(jsoupTopTenParser(getFromDiskCache(UrlUtils.URL_TOP_TEN)));
                             adapter.notifyDataSetChanged();
+                            stopRefresh();
                             Snackbar.make(mList, "network ok reflash error", Snackbar.LENGTH_LONG).show();
                         }
                     });
@@ -240,6 +260,7 @@ public class TopTenFragment extends Fragment {
         } else {
             adapter.setData(jsoupTopTenParser(getFromDiskCache(UrlUtils.URL_TOP_TEN)));
             adapter.notifyDataSetChanged();
+            stopRefresh();
             Snackbar.make(mList, "no network get data from disk", Snackbar.LENGTH_LONG).show();
         }
     }
@@ -274,5 +295,11 @@ public class TopTenFragment extends Fragment {
             topTenData.add(article);
         }
         return topTenData;
+    }
+
+    public void stopRefresh() {
+        if (mSwipeRefreshLayout.isRefreshing()) {
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
     }
 }

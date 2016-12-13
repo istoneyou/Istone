@@ -1,16 +1,13 @@
 package com.stone.njubbs.UI;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.View;
+import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -21,10 +18,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
-
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
-import com.stone.njubbs.NJUBBSApplication;
 import com.stone.njubbs.R;
 
 public class NJUBBSMainActivity extends AppCompatActivity
@@ -39,7 +32,6 @@ public class NJUBBSMainActivity extends AppCompatActivity
     private TabsAdapter mTabsAdapter = null;
     private ViewPager mViewPager = null;
 
-    private RequestQueue mQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,19 +39,6 @@ public class NJUBBSMainActivity extends AppCompatActivity
         setContentView(R.layout.activity_nju_bbsmain);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-
-        mQueue = NJUBBSApplication.getRequestQueue();
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(getApplicationContext(), TopicAndCommentsActivity.class));
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -69,13 +48,7 @@ public class NJUBBSMainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
         initTabs();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 
     private void initTabs() {
@@ -92,6 +65,7 @@ public class NJUBBSMainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
+        Log.v("stone", "activity onBackPressed");
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -156,7 +130,7 @@ public class NJUBBSMainActivity extends AppCompatActivity
         @Override
         public Fragment getItem(int position) {
             if (position == TAB_INDEX_TOP_TEN)
-                return new TopTenFragment().newInstance(mQueue);
+                return new TopTenFragment().newInstance();
             else return new BlankFragment();
         }
 

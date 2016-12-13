@@ -2,7 +2,6 @@ package com.stone.njubbs.data;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.Volley;
 import com.stone.njubbs.NJUBBSApplication;
 import com.stone.njubbs.R;
 import com.stone.njubbs.Utils.NetworkUtils;
