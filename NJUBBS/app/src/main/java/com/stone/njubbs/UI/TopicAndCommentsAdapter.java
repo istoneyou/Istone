@@ -16,6 +16,7 @@ import com.stone.njubbs.R;
 import com.stone.njubbs.UI.TopicAndCommentsActivityFragment.OnListFragmentInteractionListener;
 import com.stone.njubbs.data.Article;
 import com.stone.njubbs.data.URLImageParser;
+import com.stone.njubbs.data.URLImageTagHandler;
 
 import java.util.List;
 
@@ -54,7 +55,9 @@ public class TopicAndCommentsAdapter extends RecyclerView.Adapter<TopicAndCommen
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(position + "");
-        holder.mContentView.setText(Html.fromHtml(mValues.get(position).getTitle(), new URLImageParser(mContext, holder.mContentView, mImageCache), null));
+        holder.mContentView.setText(Html.fromHtml(mValues.get(position).getTitle(),
+                new URLImageParser(mContext, holder.mContentView, mImageCache),
+                new URLImageTagHandler(mContext)));
         holder.mContentView.setMovementMethod(LinkMovementMethod.getInstance());
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override

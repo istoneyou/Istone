@@ -152,7 +152,7 @@ public class TopicAndCommentsActivityFragment extends Fragment {
                         Elements tables = doc.select("table");
                         for(Element table : tables) {
                             Element textArea = table.select("textarea").first();
-                            String[] strings = textArea.text().split("\n");
+                            String[] strings = textArea.text().replaceAll("\r", "").split("\n");
                             StringBuilder stringBuilder = new StringBuilder();
                             for (int i = 3; i < strings.length -1; i ++)
                             {
@@ -161,14 +161,15 @@ public class TopicAndCommentsActivityFragment extends Fragment {
                                     break;
                                 }
                                 if (!s.isEmpty()) {
-                                    if (NetworkUtils.isAvailablePicUrl(getContext(), s)) {
+                                    if (NetworkUtils.isAvailablePicUrl(s)) {
+                                        stringBuilder.append("\n");
                                         stringBuilder.append("<img src='");
                                         stringBuilder.append(s);
                                         stringBuilder.append("'/>");
+                                        stringBuilder.append("\n");
                                     } else {
                                         stringBuilder.append(strings[i]);
                                     }
-                                    stringBuilder.append("\n");
                                 }
                             }
                             Article article = new Article();

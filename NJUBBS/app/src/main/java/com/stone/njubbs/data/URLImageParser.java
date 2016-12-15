@@ -3,17 +3,16 @@ package com.stone.njubbs.data;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.stone.njubbs.NJUBBSApplication;
 import com.stone.njubbs.R;
-import com.stone.njubbs.Utils.NetworkUtils;
 
 /**
  * Created by Stone on 2016/4/19.
@@ -46,9 +45,8 @@ public class URLImageParser implements Html.ImageGetter{
             public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
                 Bitmap rawBitmap = response.getBitmap();
                 if (rawBitmap != null) {
-                    Matrix matrix = NetworkUtils.getBitmapMatrix(rawBitmap.getWidth(), rawBitmap.getHeight(), DEFAULT_WIDTH, DEFAULT_HEIGH);
-                    Bitmap result = Bitmap.createBitmap(rawBitmap, 0, 0, rawBitmap.getWidth(), rawBitmap.getHeight(), matrix, true);
-                    mDrawable.bitmap = result;
+                    mDrawable.bitmap = rawBitmap;
+                    mDrawable.setBounds(0, 0, mDrawable.bitmap.getWidth(), mDrawable.bitmap.getHeight());
                     mTextView.setText(mTextView.getText());
                 } else {
                 }
@@ -59,15 +57,11 @@ public class URLImageParser implements Html.ImageGetter{
 
             }
         };
-        Bitmap bt = imageLoader.get(source, listeners).getBitmap();
-        if (bt != null) {
-            Matrix matrix = NetworkUtils.getBitmapMatrix(bt.getWidth(), bt.getHeight(), DEFAULT_WIDTH, DEFAULT_HEIGH);
-            Bitmap result = Bitmap.createBitmap(bt, 0, 0, bt.getWidth(), bt.getHeight(), matrix, true);
-            mDrawable.bitmap = result;
-        } else {
+        Bitmap bt = imageLoader.get(source, listeners, DEFAULT_WIDTH, DEFAULT_HEIGH).getBitmap();
+        if (bt == null) {
             mDrawable.bitmap = ((BitmapDrawable) mDefaultDrawable).getBitmap();
+            mDrawable.setBounds(0, 0, mDrawable.bitmap.getWidth(), mDrawable.bitmap.getHeight());
         }
-        mDrawable.setBounds(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGH);
         return mDrawable;
     }
 

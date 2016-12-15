@@ -16,8 +16,9 @@ public class NetworkUtils {
         return  (info != null && info.isConnected());
     }
 
-    public static  boolean isAvailablePicUrl(Context context, String str) {
-        return (str.startsWith("http") && (str.endsWith(".jpg") || str.endsWith(".png") || str.endsWith(".jpeg") || str.endsWith(".gif")));
+    public static  boolean isAvailablePicUrl(String str) {
+        return (str.startsWith("http") && (str.endsWith(".JPG") || str.endsWith(".jpg")
+                || str.endsWith(".png") || str.endsWith(".jpeg") || str.endsWith(".gif")));
     }
 
     public static Matrix getBitmapMatrix(int srcWidth, int srcHeight, int dstWidth, int dstHeight) {
