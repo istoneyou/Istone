@@ -21,11 +21,6 @@ public class TopicAndCommentsActivity extends AppCompatActivity implements Topic
     private RequestQueue mQueue;
 
     @Override
-    public void onListFragmentInteraction(Article item) {
-
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_topic_and_comments);
@@ -53,6 +48,11 @@ public class TopicAndCommentsActivity extends AppCompatActivity implements Topic
                         .setAction("Action", null).show();
             }
         });
+    }
+
+    @Override
+    public void onListFragmentInteraction(Article item) {
+
     }
 
     @Override

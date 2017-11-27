@@ -1,7 +1,13 @@
 package com.stone.njubbs.UI;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -16,7 +22,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-
+import com.stone.njubbs.ITestAIDL;
 import com.stone.njubbs.R;
 
 public class NJUBBSMainActivity extends AppCompatActivity
@@ -30,7 +36,7 @@ public class NJUBBSMainActivity extends AppCompatActivity
     private TabLayout mTabLayout = null;
     private TabsAdapter mTabsAdapter = null;
     private ViewPager mViewPager = null;
-
+    ITestAIDL mService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +56,37 @@ public class NJUBBSMainActivity extends AppCompatActivity
         initTabs();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent i = new Intent("com.stone.bind_service");
+        i.setPackage("com.stone.njubbs");
+        bindService(i, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mService = ITestAIDL.Stub.asInterface(iBinder);
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mService = null;
+        }
+    };
+
     private void initTabs() {
         mTabTitles = new String[NUM_TAB];
         mTabTitles[0] = getString(R.string.tab_title_top_ten);
@@ -64,6 +101,7 @@ public class NJUBBSMainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -88,6 +126,11 @@ public class NJUBBSMainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            try {
+                android.util.Log.v("stone", "service PID = " + mService.printHello());
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             return true;
         }
 

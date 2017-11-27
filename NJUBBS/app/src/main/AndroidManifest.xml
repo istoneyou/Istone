@@ -7,7 +7,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-
     <application
         android:name=".NJUBBSApplication"
         android:allowBackup="true"
@@ -28,7 +27,16 @@
         <activity
             android:name=".UI.TopicAndCommentsActivity"
             android:label="@string/title_activity_topic_and_comments"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <service
+            android:name=".TestService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.stone.bind_service" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
