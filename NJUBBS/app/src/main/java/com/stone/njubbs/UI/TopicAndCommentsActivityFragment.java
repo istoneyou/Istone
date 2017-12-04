@@ -162,11 +162,10 @@ public class TopicAndCommentsActivityFragment extends Fragment {
                                 }
                                 if (!s.isEmpty()) {
                                     if (NetworkUtils.isAvailablePicUrl(s)) {
-                                        stringBuilder.append("\n");
+                                        stringBuilder.append("<br>");
                                         stringBuilder.append("<img src='");
                                         stringBuilder.append(s);
                                         stringBuilder.append("'/>");
-                                        stringBuilder.append("\n");
                                     } else {
                                         stringBuilder.append(strings[i]);
                                     }

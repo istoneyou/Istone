@@ -48,7 +48,6 @@ public class URLImageParser implements Html.ImageGetter{
                     mDrawable.bitmap = rawBitmap;
                     mDrawable.setBounds(0, 0, mDrawable.bitmap.getWidth(), mDrawable.bitmap.getHeight());
                     mTextView.setText(mTextView.getText());
-                } else {
                 }
             }
 

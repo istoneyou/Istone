@@ -1,11 +1,9 @@
 package com.stone.njubbs.UI;
 
 import android.content.Context;
-import android.support.v4.util.LruCache;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +56,9 @@ public class TopicAndCommentsAdapter extends RecyclerView.Adapter<TopicAndCommen
         holder.mContentView.setText(Html.fromHtml(mValues.get(position).getTitle(),
                 new URLImageParser(mContext, holder.mContentView, mImageCache),
                 new URLImageTagHandler(mContext)));
+//        holder.mContentView.setText(Html.fromHtml("open the         rrrrr          <click size='18'><font color='#ff6c00'><big><big>baidu</big></big></font></click>",
+//                new URLImageParser(mContext, holder.mContentView, mImageCache),
+//                new URLImageTagHandler(mContext)));
         holder.mContentView.setMovementMethod(LinkMovementMethod.getInstance());
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
