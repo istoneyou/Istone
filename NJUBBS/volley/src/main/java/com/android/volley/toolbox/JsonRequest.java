@@ -39,7 +39,11 @@ public abstract class JsonRequest<T> extends Request<T> {
     private static final String PROTOCOL_CONTENT_TYPE =
         String.format("application/json; charset=%s", PROTOCOL_CHARSET);
 
-    private final Listener<T> mListener;
+    /** Lock to guard mListener as it is cleared on cancel() and read on delivery. */
+    private final Object mLock = new Object();
+
+    // @GuardedBy("mLock")
+    private Listener<T> mListener;
     private final String mRequestBody;
 
     /**
@@ -48,6 +52,7 @@ public abstract class JsonRequest<T> extends Request<T> {
      *
      * @deprecated Use {@link #JsonRequest(int, String, String, Listener, ErrorListener)}.
      */
+    @Deprecated
     public JsonRequest(String url, String requestBody, Listener<T> listener,
             ErrorListener errorListener) {
         this(Method.DEPRECATED_GET_OR_POST, url, requestBody, listener, errorListener);
@@ -61,8 +66,22 @@ public abstract class JsonRequest<T> extends Request<T> {
     }
 
     @Override
+    public void cancel() {
+        super.cancel();
+        synchronized (mLock) {
+            mListener = null;
+        }
+    }
+
+    @Override
     protected void deliverResponse(T response) {
-        mListener.onResponse(response);
+        Response.Listener<T> listener;
+        synchronized (mLock) {
+            listener = mListener;
+        }
+        if (listener != null) {
+            listener.onResponse(response);
+        }
     }
 
     @Override
@@ -71,6 +90,7 @@ public abstract class JsonRequest<T> extends Request<T> {
     /**
      * @deprecated Use {@link #getBodyContentType()}.
      */
+    @Deprecated
     @Override
     public String getPostBodyContentType() {
         return getBodyContentType();
@@ -79,6 +99,7 @@ public abstract class JsonRequest<T> extends Request<T> {
     /**
      * @deprecated Use {@link #getBody()}.
      */
+    @Deprecated
     @Override
     public byte[] getPostBody() {
         return getBody();

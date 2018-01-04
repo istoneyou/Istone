@@ -187,6 +187,5 @@ public class TopicAndCommentsActivityFragment extends Fragment {
                 });
         topicAndCommentsRequest.setShouldCache(true);
         mQueue.add(topicAndCommentsRequest);
-        mQueue.start();
     }
 }

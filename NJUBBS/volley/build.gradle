@@ -29,9 +29,12 @@ repositories {
     jcenter()
 }
 
+group = 'com.android.volley'
+version = '1.1.1-SNAPSHOT'
+
 android {
-    compileSdkVersion 22
-    buildToolsVersion = '27.0.1'
+    compileSdkVersion 25
+    buildToolsVersion = '27.0.3'
 }
 
 apply from: 'rules.gradle'

@@ -257,7 +257,6 @@ public class TopTenFragment extends Fragment implements SwipeRefreshLayout.OnRef
                     });
             topTenRequest.setShouldCache(true);
             mQueue.add(topTenRequest);
-            mQueue.start();
         } else {
             adapter.setData(jsoupTopTenParser(getFromDiskCache(UrlUtils.URL_TOP_TEN)));
             adapter.notifyDataSetChanged();
