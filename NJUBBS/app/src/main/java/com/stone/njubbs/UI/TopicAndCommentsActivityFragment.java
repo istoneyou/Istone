@@ -166,6 +166,7 @@ public class TopicAndCommentsActivityFragment extends Fragment {
                                         stringBuilder.append("<img src='");
                                         stringBuilder.append(s);
                                         stringBuilder.append("'/>");
+                                        stringBuilder.append("<br>");
                                     } else {
                                         stringBuilder.append(strings[i]);
                                     }

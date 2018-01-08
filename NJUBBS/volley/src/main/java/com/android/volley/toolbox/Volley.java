@@ -43,7 +43,6 @@ public class Volley {
         BasicNetwork network;
         if (stack == null) {
             if (Build.VERSION.SDK_INT >= 9) {
-                android.util.Log.v("stonetest", "ss");
                 network = new BasicNetwork(new HurlStack());
             } else {
                 // Prior to Gingerbread, HttpUrlConnection was unreliable.
