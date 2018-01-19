@@ -28,6 +28,7 @@ import com.stone.njubbs.R;
 import com.stone.njubbs.Utils.NetworkUtils;
 import com.stone.njubbs.Utils.UrlUtils;
 import com.stone.njubbs.data.Article;
+import com.stone.njubbs.data.NJUBBSApiStore;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -37,6 +38,9 @@ import java.util.Map;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+
+import retrofit2.Call;
+import retrofit2.Callback;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -235,34 +239,49 @@ public class TopTenFragment extends Fragment implements SwipeRefreshLayout.OnRef
     }
 
     private void loadTopTenData(Context context) {
-        if (NetworkUtils.isNetworkAvailable(context)) {
-            final StringRequest topTenRequest = new StringRequest(Request.Method.GET, UrlUtils.URL_TOP_TEN,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            adapter.setData(jsoupTopTenParser(response));
-                            adapter.notifyDataSetChanged();
-                            stopRefresh();
-                            Snackbar.make(mList, "network ok reflash success", Snackbar.LENGTH_LONG).show();
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            adapter.setData(jsoupTopTenParser(getFromDiskCache(UrlUtils.URL_TOP_TEN)));
-                            adapter.notifyDataSetChanged();
-                            stopRefresh();
-                            Snackbar.make(mList, "network ok reflash error", Snackbar.LENGTH_LONG).show();
-                        }
-                    });
-            topTenRequest.setShouldCache(true);
-            mQueue.add(topTenRequest);
-        } else {
-            adapter.setData(jsoupTopTenParser(getFromDiskCache(UrlUtils.URL_TOP_TEN)));
-            adapter.notifyDataSetChanged();
-            stopRefresh();
-            Snackbar.make(mList, "no network get data from disk", Snackbar.LENGTH_LONG).show();
-        }
+//        if (NetworkUtils.isNetworkAvailable(context)) {
+//            final StringRequest topTenRequest = new StringRequest(Request.Method.GET, UrlUtils.URL_TOP_TEN,
+//                    new Response.Listener<String>() {
+//                        @Override
+//                        public void onResponse(String response) {
+//                            adapter.setData(jsoupTopTenParser(response));
+//                            adapter.notifyDataSetChanged();
+//                            stopRefresh();
+//                            Snackbar.make(mList, "network ok reflash success", Snackbar.LENGTH_LONG).show();
+//                        }
+//                    },
+//                    new Response.ErrorListener() {
+//                        @Override
+//                        public void onErrorResponse(VolleyError error) {
+//                            adapter.setData(jsoupTopTenParser(getFromDiskCache(UrlUtils.URL_TOP_TEN)));
+//                            adapter.notifyDataSetChanged();
+//                            stopRefresh();
+//                            Snackbar.make(mList, "network ok reflash error", Snackbar.LENGTH_LONG).show();
+//                        }
+//                    });
+//            topTenRequest.setShouldCache(true);
+//            mQueue.add(topTenRequest);
+//        } else {
+//            adapter.setData(jsoupTopTenParser(getFromDiskCache(UrlUtils.URL_TOP_TEN)));
+//            adapter.notifyDataSetChanged();
+//            stopRefresh();
+//            Snackbar.make(mList, "no network get data from disk", Snackbar.LENGTH_LONG).show();
+//        }
+        NJUBBSApiStore.NJUBBSApi topTenApi = new NJUBBSApiStore().buildTopTenApi();
+        Call<List<Article>> call = topTenApi.getTopTen();
+        call.enqueue(new Callback<List<Article>>() {
+            @Override
+            public void onResponse(Call<List<Article>> call, retrofit2.Response<List<Article>> response) {
+                adapter.setData(response.body());
+                adapter.notifyDataSetChanged();
+                stopRefresh();
+            }
+
+            @Override
+            public void onFailure(Call<List<Article>> call, Throwable t) {
+
+            }
+        });
     }
 
     private String getFromDiskCache(String url) {
