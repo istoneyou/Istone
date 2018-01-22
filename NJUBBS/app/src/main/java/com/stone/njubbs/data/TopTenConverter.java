@@ -35,7 +35,7 @@ public final class TopTenConverter implements Converter<ResponseBody, List<Artic
             Elements cols = trs.get(i).children();
             String board = cols.get(1).text();
             String title = cols.get(2).text();
-            String uri = UrlUtils.BASE_BBS_URL + cols.get(2).select("a").attr("href").trim();
+            String uri = UrlUtils.BASE_BBS_URL + cols.get(2).select("a").attr("href").trim() + UrlUtils.ARTICLE_ALL;
             String author = cols.get(3).text();
             String num = cols.get(4).text();
             Article article = new Article(board, title, uri, author, num);

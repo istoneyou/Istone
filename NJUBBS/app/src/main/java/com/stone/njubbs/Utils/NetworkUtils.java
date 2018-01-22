@@ -17,6 +17,7 @@ public class NetworkUtils {
     }
 
     public static  boolean isAvailablePicUrl(String str) {
+        str = str.toLowerCase();
         return (str.startsWith("http") && (str.endsWith(".JPG") || str.endsWith(".jpg")
                 || str.endsWith(".png") || str.endsWith(".jpeg") || str.endsWith(".gif")));
     }

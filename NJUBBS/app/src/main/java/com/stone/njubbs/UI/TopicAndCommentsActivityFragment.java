@@ -7,29 +7,22 @@ import android.support.v4.app.Fragment;
 import android.support.v4.util.LruCache;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.stone.njubbs.R;
-import com.stone.njubbs.Utils.NetworkUtils;
 import com.stone.njubbs.data.Article;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import com.stone.njubbs.data.BBSDataConverterFactory;
+import com.stone.njubbs.data.NJUBBSApiStore;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
 
 
 /**
@@ -143,50 +136,18 @@ public class TopicAndCommentsActivityFragment extends Fragment {
     }
 
     private void loadTopicAndComments() {
-        final List<Article> mData = new ArrayList<>();
-        final StringRequest topicAndCommentsRequest = new StringRequest(Request.Method.GET, queryURl,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Document doc = Jsoup.parse(response);
-                        Elements tables = doc.select("table");
-                        for(Element table : tables) {
-                            Element textArea = table.select("textarea").first();
-                            String[] strings = textArea.text().replaceAll("\r", "").split("\n");
-                            StringBuilder stringBuilder = new StringBuilder();
-                            for (int i = 3; i < strings.length -1; i ++)
-                            {
-                                String s = strings[i].trim();
-                                if (s.endsWith("[m")) {
-                                    break;
-                                }
-                                if (!s.isEmpty()) {
-                                    if (NetworkUtils.isAvailablePicUrl(s)) {
-                                        stringBuilder.append("<br>");
-                                        stringBuilder.append("<img src='");
-                                        stringBuilder.append(s);
-                                        stringBuilder.append("'/>");
-                                        stringBuilder.append("<br>");
-                                    } else {
-                                        stringBuilder.append(strings[i]);
-                                    }
-                                }
-                            }
-                            Article article = new Article();
-                            article.setTitle(stringBuilder.toString());
-                            mData.add(article);
-                        }
-                        mAdapter.setData(mData);
-                        mAdapter.notifyDataSetChanged();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
+        NJUBBSApiStore.NJUBBSApi getTopicAndComments = new NJUBBSApiStore().buildGetArticleApi(BBSDataConverterFactory.CONVERTTER_GET_ARTICLE);
+        Call<List<Article>> call = getTopicAndComments.getArticleData(queryURl);
+        call.enqueue(new Callback<List<Article>>() {
+            @Override
+            public void onResponse(Call<List<Article>> call, retrofit2.Response<List<Article>> response) {
+                mAdapter.setData(response.body());
+                mAdapter.notifyDataSetChanged();
+            }
 
-                    }
-                });
-        topicAndCommentsRequest.setShouldCache(true);
-        mQueue.add(topicAndCommentsRequest);
+            @Override
+            public void onFailure(Call<List<Article>> call, Throwable t) {
+            }
+        });
     }
 }
